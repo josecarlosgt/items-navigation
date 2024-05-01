@@ -105,14 +105,14 @@
                 for(let i = jobsStartIndex; i <= jobsEndIndex && i < JOBS.length; i++) {
                     // Retrieve job data
                     const jobData = JOBS[i];
-                    console.log(jobData);
+                    console.log('Job data:', jobData);
                     
                     // Generate HTML to display job data
                     const jobHTML = $('#template').clone();
-                    jobHTML.removeAttr('id')
-                        .find('.jobNumber').text(i + 1)
-                        .find('.companyName').text(jobData.company_name)
-                        .find('.jobTitle').text(jobData.title);
+                    jobHTML.removeAttr('id');
+                    jobHTML.find('.jobNumber').text(i + 1);
+                    jobHTML.find('.companyName').text(jobData.company_name)
+                    jobHTML.find('.jobTitle').text(jobData.title);
 
                     $('#jobs').append(jobHTML);
 
