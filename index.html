@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Jobs list app">
+
+    <title>Jobs List</title>
+    <style>
+        #template {
+            display: none;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 50px auto;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <h1>Jobs List</h1>
+
+        <!-- Navigation -->
+        <div id="navigation" data-index="0">
+            Navigation:
+            <button type="button" id="backward" data-direction="-1">←
+            </button> <button type="button" id="forward" data-direction="1">→</button>
+        </div>
+
+        <!-- Jobs display -->
+        <div id="jobs"></div>
+    </main>
+
+    <!-- Template -->
+    <ul id="template" class="job">
+        <li><span class="label">Number:</span> <span class="jobNumber"></span></li>
+        <li><span class="label">Company name:</span> <span class="companyName"></span></li>
+        <li><span class="label">Job title:</span> <span class="jobTitle"></span></li>
+    </ul>
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <!-- Custom script -->
+    <script type="text/javascript">
+        (() => {
+            const JOBS_URL = 'https://raw.githubusercontent.com/SimplifyJobs/Summer2024-Internships/dev/.github/scripts/listings.json';
+            
+            // Store all jobs in an array
+            let JOBS = [];
+
+            // Specify number N of jobs to be displayed
+            const NO_JOBS_VIEW = 3;
+
+            // Navigate (move) forward or backward 
+            const move = function () {
+                // Determine direction: -1 (backward) or 1 (forward) 
+                const direction = $(this).data('direction');
+
+                // Retrieve current index
+                const currentIndex = $('#navigation').data('index');
+
+                /* Update current index based on the direction:
+                    Forward: index = index + N
+                    Backward: index = index - N
+                */
+                let newIndex = direction > 0 ? 
+                currentIndex + NO_JOBS_VIEW : currentIndex - NO_JOBS_VIEW;
+
+                // Prevent index from getting negative values
+                if (newIndex < 0) newIndex = 0;
+
+                // Prevent index from getting values greater than the jobs array length
+                if (newIndex > JOBS.length - 1) newIndex = JOBS.length - 1;
+
+                console.log('INDEX UPDATED: ',currentIndex, ' -> ', newIndex);
+
+                // Store updated index
+                $('#navigation').data('index', newIndex);
+
+                // Show new items
+                show();
+            }
+
+            const show = function () {
+                // Clear jobs display
+                $('#jobs').empty();
+
+                // Retrieve current index as start index
+                const jobsStartIndex = $('#navigation').data('index');
+
+                // Calculate end index: end index = start index + (N -1 )
+                const jobsEndIndex = jobsStartIndex + (NO_JOBS_VIEW - 1);
+
+                console.log('DISPLAYED RANGE: [', jobsStartIndex, ', ', jobsEndIndex, ']');
+
+                // Display jobs within range specified by start and end indexes
+                for(let i = jobsStartIndex; i <= jobsEndIndex && i < JOBS.length; i++) {
+                    // Retrieve job data
+                    const jobData = JOBS[i];
+                    console.log(jobData);
+                    
+                    // Generate HTML to display job data
+                    const jobHTML = $('#template').clone();
+                    jobHTML.removeAttr('id')
+                        .find('.jobNumber').text(i + 1)
+                        .find('.companyName').text(jobData.company_name)
+                        .find('.jobTitle').text(jobData.title);
+
+                    $('#jobs').append(jobHTML);
+
+                    // Make job HTML visible
+                    jobHTML.css('display', 'block');
+                }
+            }
+
+            $(document).ready(function () {
+                // Retrieve jobs data from API
+                $.getJSON(JOBS_URL, function (data) {
+                    JOBS = data;
+
+                    // Show first N jobs 
+                    show();
+
+                    // Add event handlers to navigation controls
+                    $('#backward').on('click', move);
+                    $('#forward').on('click', move);
+                });
+            });
+
+        })(document);  
+    </script>
+
+</body>
+
+</html>
